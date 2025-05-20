@@ -18,7 +18,7 @@ def run_interface():
     query = ""
 
     if input_method == "Text":
-        query = st.text_input("Enter your query")
+        query = st.text_input("Enter your query (e.g., 'Albert Einstein')")
     else:
         if st.button("🎙️ Record Speech"):
             result = speech_to_text()
