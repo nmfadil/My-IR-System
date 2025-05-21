@@ -1,5 +1,5 @@
 import streamlit as st
-from ui import login_page, ir_interface
+from ui import login_page, ir_interface2
 
 st.set_page_config(page_title="Information Retrieval System")
 
@@ -15,4 +15,4 @@ if not st.session_state["logged_in"]:
     else:
         login_page.display_signup_page()
 else:
-    ir_interface.run_interface()
+    ir_interface2.render_ir_app()
