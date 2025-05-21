@@ -1,16 +1,21 @@
 import wikipedia
-import re
+#import re
 import io
-import requests
+#import requests
 from googleapiclient.discovery import build
 from gtts import gTTS
-from PIL import Image
+#from PIL import Image
 import speech_recognition as sr
 import streamlit as st
 from .utils import clean_query
+from PyPDF2 import PdfReader
+from langchain.text_splitter import CharacterTextSplitter
+from langchain_community.vectorstores import FAISS
+from langchain_huggingface import HuggingFaceEndpointEmbeddings
 
 API_KEY = st.secrets["CS_API_KEY"]
 CSE_ID = st.secrets["CSE_ID"]
+HF_TOKEN = st.secrets["HUGGINGFACEHUB_API_TOKEN"]
 
 def fetch_answer(query):
     try:
@@ -58,3 +63,34 @@ def speech_to_text():
             return "😕 Sorry, I couldn't understand your speech."
         except sr.RequestError:
             return "❌ Speech service is unreachable."
+        
+
+def get_pdf_text(pdf_file):
+    reader = PdfReader(pdf_file)
+    text = ""
+    for page in reader.pages:
+        content = page.extract_text()
+        if content:
+            text += content
+    return text
+
+def get_text_chunks(text):
+    splitter = CharacterTextSplitter(
+        separator="\n",
+        chunk_size=1000,
+        chunk_overlap=100,
+        length_function=len
+    )
+    return splitter.split_text(text)
+
+def get_vectorstore(chunks):
+    try:
+        embeddings = HuggingFaceEndpointEmbeddings(
+            model="sentence-transformers/all-mpnet-base-v2",  # or any hosted model
+            task="feature-extraction",
+            huggingfacehub_api_token=HF_TOKEN  # via .env or secrets
+        )
+        vectorstore = FAISS.from_texts(texts=chunks, embedding=embeddings)
+    except Exception as e:
+        raise RuntimeError(f"❌ Failed to build vectorstore: {e}")
+    return vectorstore
