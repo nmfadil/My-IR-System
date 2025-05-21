@@ -1,0 +1,13 @@
+google-api-python-client
+gtts
+SpeechRecognition
+wikipedia
+streamlit
+supabase
+pypdf2
+langchain
+faiss-cpu
+langchain-community
+langchain_huggingface
+agno
+groq
